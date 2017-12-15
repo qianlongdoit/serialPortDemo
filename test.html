@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>JavaScript串口测试</title>
+    <script src="./public/js/jquery-3.1.1.js"></script>
+</head>
+<body>
+
+<form name="serialport">
+    <label>
+        产品型号：
+        <select id="type" style="width: 90px;font-size: 14px;">
+            <option value="PM2005">PM2005</option>
+            <option value="PM1003">PM1003</option>
+        </select>
+    </label>
+    <label>
+        端口号：
+        <select id="ports" style="width: 80px;font-size: 14px;">
+        </select>
+    </label>
+    <label>
+        波特率：
+        <select id="baudRate" style="width: 80px;font-size: 14px;">
+            <option value="4800">4800</option>
+            <option value="7200">7200</option>
+            <option value="9600" selected>9600</option>
+            <option value="14400">14400</option>
+            <option value="19200">19200</option>
+            <option value="38400">38400</option>
+        </select>
+    </label>
+    <input type="button" id="open" style="width:80px;height:30px;font-size:13px" name="ConfigButton" value="打开串口">
+
+    <fieldset style="width:200px;height:250px;text-align:center;">
+        <legend>发送区域</legend>
+        <div style="float:left;">
+            <textarea id="txtSend" name="txtSend" style="width:200px;height:160px"
+                      placeholder="示例数据：11 0c 23 00 00 00 7D 0D 51 03 2C 0E 19"></textarea>
+            <br/>
+
+            <input type="button" id="SendButton" style="width:100px;height:30px" name="SendButton" value="发送">
+        </div>
+    </fieldset>
+
+    <fieldset style="width:200px;height:250px;text-align:center;">
+        <legend>接收区域</legend>
+        <div style="float:left;">
+            <textarea id="txtReceive" name="txtReceive" readonly style="width:200px;height:160px"></textarea>
+            <br/>
+
+            <input type="button" id="clearBtn" style="width:100px;height:30px" name="clearBtn" value="清空">
+        </div>
+    </fieldset>
+
+
+</form>
+
+<script src="./public/js/index.js"></script>
+</body>
+</html>
