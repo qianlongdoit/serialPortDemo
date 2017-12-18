@@ -13,6 +13,12 @@ const comConfig = {
     autoOpen: false  //串口自动打开
 };
 
+//  不同型号的串口读取和设置编号时应答的bite长度
+const type = {
+    "PM2005": {setLen: 15, readLen: 14},
+    "PM1003": {setLen: 4, readLen: 14},
+};
+
 let com;
 
 //  显示首页
@@ -60,7 +66,7 @@ exports.openPort = (req, res, next) => {
         var config = req.query;
         comConfig.baudRate = ~~(config.baudRate);
         com = new SerialPort(config.comName, comConfig);
-        comListener(com);
+        comListener(com, type[config.productType]);
 
         com.open((err) => {
             if (err) {
@@ -134,14 +140,17 @@ exports.writePort = (req, res, next) => {
 /**初始化串口
  * 增加串口监听data事件，数据接收完毕时触发结束事件
  */
-function comListener(port, res) {
+function comListener(port, type) {
+    //  n统计字节长度、sum和校验累加、
+    // data用来保存一段一段buffer的数组、将一段段buffer连接起来后返回的整个buffer
     let n = 0,
+        sum = 0,
         data = [],
         total = [];
     //  增加监听data事件
     port.addListener("data", (chunk) => {
-        //  总bite长度为15时触发数据接收结束事件
-        _receiveEnd(chunk, 15, (total) => {
+        _receiveEnd(chunk, type, (total) => {
+
             return port.emit("end", total);
         })
     });
@@ -150,18 +159,29 @@ function comListener(port, res) {
         console.err(err);
     });
 
-
+    type.setLen = ~~(type.setLen);
+    type.readLen = ~~(type.readLen);
 //  判断数据接收完毕
-//  接收3个parameter  chunk:发送的数据、maxLen:数据总长度、callback:数据接收完成做的事情
-    function _receiveEnd(chunk, maxLen, callback) {
+//  接收3个parameter  chunk:发送的数据、type:不同型号的通信协议、callback:数据接收完成做的事情
+    function _receiveEnd(chunk, type, callback) {
         n += chunk.length;
         data.push(chunk);
 
         console.log(`监听串口数据，当前长度${chunk.length}，总长度${n}-------`, chunk);
+        chunk.forEach((value, key) => {
+            sum += value;
+        });
 
-        if (n !== maxLen) return;
-        total = Buffer.concat(data, maxLen);
+        //  如果应答数据的总长度为该型号的设置应答或读取应答长度，且和校验无误，则数据接收完成；都不是则退出
+        if (n === type.setLen && sum % 256 === 0) {
+            total = Buffer.concat(data, type.setLen);
+        } else if (n === type.readLen && sum % 256 === 0) {
+            total = Buffer.concat(data, type.readLen);
+        } else {
+            return;
+        }
         n = 0;
+        sum = 0;
         data = [];
         callback && callback(total);
     }

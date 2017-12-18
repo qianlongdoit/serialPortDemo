@@ -37,7 +37,7 @@ $(function () {
                     $("#ports").attr("disabled", true);
                     $("#baudRate").attr("disabled", true)
                 }
-            }else {
+            } else {
                 alert(result.desc);
             }
         })
@@ -59,7 +59,7 @@ $(function () {
         });
 
         //  发送数据
-        $.get("/writePort", {id: buffer}, function (result) {
+        $.get("http://127.0.0.1:3000/writePort", {id: buffer}, function (result) {
             if (!result.code) {
                 alert(result.desc);
                 return;
